@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: societyfix-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGO_URI
+        sync: false   # You will paste this manually in the Render dashboard
+      - key: FRONTEND_URL
+        sync: false   # You will paste the Vercel URL here after deploying frontend

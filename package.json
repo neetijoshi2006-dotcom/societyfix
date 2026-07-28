@@ -1,0 +1,16 @@
+{
+  "name": "society-fix",
+  "version": "1.0.0",
+  "description": "SocietyFix - Full-stack Complaint Management System for Apartment Societies",
+  "main": "server.js",
+  "scripts": {
+    "install-all": "npm install; cd backend; npm install; cd ../frontend; npm install --legacy-peer-deps",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

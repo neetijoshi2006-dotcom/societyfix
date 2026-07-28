@@ -1,0 +1,40 @@
+# ─── Dependencies ────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ─── Environment Variables (NEVER commit) ────
+.env
+.env.local
+.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ─── Local Database (JSON fallback) ──────────
+backend/data/db.json
+
+# ─── Build Output ─────────────────────────────
+frontend/dist/
+frontend/build/
+
+# ─── Uploads / Media ──────────────────────────
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# ─── Logs ─────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── OS Files ─────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Editor Metadata ──────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
