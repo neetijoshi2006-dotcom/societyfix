@@ -303,15 +303,18 @@ export default function ComplaintDetail() {
               <div className="space-y-2">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Complaint Attachments</span>
                 <div className="flex flex-wrap gap-2.5">
-                  {complaint.images.map((img, idx) => (
-                    <a key={idx} href={`http://localhost:5000${img}`} target="_blank" rel="noreferrer" className="no-print">
-                      <img 
-                        src={`http://localhost:5000${img}`} 
-                        alt="attachment" 
-                        className="w-24 h-24 rounded-xl object-cover border border-slate-200 dark:border-slate-900 shadow-sm hover:opacity-90 transition"
-                      />
-                    </a>
-                  ))}
+                  {complaint.images.map((img, idx) => {
+                    const serverUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+                    return (
+                      <a key={idx} href={`${serverUrl}${img}`} target="_blank" rel="noreferrer" className="no-print">
+                        <img 
+                          src={`${serverUrl}${img}`} 
+                          alt="attachment" 
+                          className="w-24 h-24 rounded-xl object-cover border border-slate-200 dark:border-slate-900 shadow-sm hover:opacity-90 transition"
+                        />
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             )}
