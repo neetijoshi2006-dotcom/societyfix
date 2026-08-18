@@ -209,7 +209,7 @@ connectDB().then(async () => {
           {
             _id: new mongoose.Types.ObjectId('660d1b2f9f8c3c2f48d3c1a1'),
             name: 'Vikram Aditya',
-            email: 'admin@societyfix.com',
+            email: 'neetijoshi2006@gmail.com',
             password: hashPassword('admin123'),
             phone: '+91 98765 43210',
             role: 'admin',

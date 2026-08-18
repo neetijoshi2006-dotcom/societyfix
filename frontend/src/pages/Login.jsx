@@ -21,12 +21,7 @@ export default function Login() {
   const [floor, setFloor] = useState('4');
   const [flatNumber, setFlatNumber] = useState('402');
 
-  const demoAccounts = [
-    { label: 'Resident', email: 'amit@societyfix.com', pass: 'resident123', desc: 'Amit Sharma (Wing A-402)', role: 'resident', color: 'from-blue-500 to-indigo-600' },
-    { label: 'Technician', email: 'rahul@societyfix.com', pass: 'staff123', desc: 'Rahul Kumar (Electrician)', role: 'staff', color: 'from-violet-500 to-purple-600' },
-    { label: 'Manager', email: 'manager@societyfix.com', pass: 'manager123', desc: 'Suresh Patil (Society Office)', role: 'manager', color: 'from-emerald-500 to-teal-600' },
-    { label: 'Super Admin', email: 'admin@societyfix.com', pass: 'admin123', desc: 'Vikram Aditya (Global Sys)', role: 'admin', color: 'from-rose-500 to-orange-600' }
-  ];
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,21 +57,6 @@ export default function Login() {
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemoLogin = async (acc) => {
-    setError('');
-    setLoading(true);
-    const res = await login(acc.email, acc.pass);
-    if (res.success) {
-      if (acc.role === 'resident') navigate('/resident');
-      else if (acc.role === 'staff') navigate('/staff');
-      else if (acc.role === 'manager') navigate('/manager');
-      else if (acc.role === 'admin') navigate('/admin');
-    } else {
-      setError(res.error);
       setLoading(false);
     }
   };
@@ -270,29 +250,6 @@ export default function Login() {
               )}
             </button>
           </form>
-
-          {/* Quick Login Character Selectors */}
-          <div className="mt-8 border-t border-slate-800/80 pt-6">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 block text-center mb-4">
-              Demo character quick logins
-            </span>
-            <div className="grid grid-cols-2 gap-3">
-              {demoAccounts.map((acc) => (
-                <button
-                  key={acc.email}
-                  onClick={() => handleDemoLogin(acc)}
-                  disabled={loading}
-                  className="p-3 text-left bg-slate-900/50 hover:bg-slate-900 border border-slate-800 hover:border-slate-700/80 rounded-2xl transition group"
-                >
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-bold text-slate-300">{acc.label}</span>
-                    <span className={`w-1.5 h-1.5 rounded-full bg-gradient-to-tr ${acc.color}`} />
-                  </div>
-                  <p className="text-[10px] text-slate-500 truncate group-hover:text-slate-400">{acc.desc}</p>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </motion.div>
     </div>

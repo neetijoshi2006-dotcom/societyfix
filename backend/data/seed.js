@@ -17,7 +17,7 @@ const seedData = () => {
     {
       id: 'usr_admin1',
       name: 'Vikram Aditya',
-      email: 'admin@societyfix.com',
+      email: 'neetijoshi2006@gmail.com',
       password: hashPassword('admin123'),
       phone: '+91 98765 43210',
       role: 'admin',
