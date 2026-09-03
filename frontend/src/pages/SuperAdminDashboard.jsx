@@ -119,7 +119,7 @@ export default function SuperAdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 dark:divide-slate-800">
-                {users.map((u) => (
+                {(users || []).map((u) => (
                   <tr key={u.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition">
                     <td className="py-3 flex items-center gap-2.5">
                       <img src={u.avatar} alt={u.name} className="w-7 h-7 rounded-full border bg-slate-100" />

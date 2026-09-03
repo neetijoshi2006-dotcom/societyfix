@@ -34,9 +34,10 @@ export default function ResidentDashboard() {
       if (statusFilter) params.status = statusFilter;
       
       const res = await api.get('/complaints', { params });
-      setComplaints(res.data.complaints);
+      setComplaints(res.data.complaints || []);
     } catch (err) {
       console.error('Error fetching complaints', err);
+      setComplaints([]);
     } finally {
       setLoading(false);
     }
@@ -56,16 +57,16 @@ export default function ResidentDashboard() {
   };
 
   // Filter complaints list by search query locally
-  const filteredComplaints = complaints.filter(c => 
-    c.title.toLowerCase().includes(search.toLowerCase()) ||
-    c.id.toLowerCase().includes(search.toLowerCase()) ||
-    c.category.toLowerCase().includes(search.toLowerCase())
+  const filteredComplaints = (complaints || []).filter(c => 
+    c.title?.toLowerCase().includes(search.toLowerCase()) ||
+    c.id?.toLowerCase().includes(search.toLowerCase()) ||
+    c.category?.toLowerCase().includes(search.toLowerCase())
   );
 
   // Compute stat counts
-  const pendingCount = complaints.filter(c => c.status === 'pending').length;
-  const inProgressCount = complaints.filter(c => ['assigned', 'accepted', 'in-progress', 'waiting-materials'].includes(c.status)).length;
-  const completedCount = complaints.filter(c => ['completed', 'closed'].includes(c.status)).length;
+  const pendingCount = (complaints || []).filter(c => c.status === 'pending').length;
+  const inProgressCount = (complaints || []).filter(c => ['assigned', 'accepted', 'in-progress', 'waiting-materials'].includes(c.status)).length;
+  const completedCount = (complaints || []).filter(c => ['completed', 'closed'].includes(c.status)).length;
 
   const getStatusStyle = (status) => {
     switch (status) {

@@ -47,10 +47,11 @@ export default function ManagerDashboard() {
         api.get('/analytics'),
         api.get('/complaints')
       ]);
-      setAnalytics(analRes.data);
-      setComplaints(compRes.data.complaints);
+      setAnalytics(analRes.data || null);
+      setComplaints(compRes.data?.complaints || []);
     } catch (err) {
       console.error('Failed to load manager dashboard data', err);
+      setComplaints([]);
     } finally {
       setLoading(false);
     }
