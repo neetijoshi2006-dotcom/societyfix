@@ -55,10 +55,14 @@ export const AuthProvider = ({ children }) => {
       
       try {
         const res = await api.get('/auth/me');
-        setUser(res.data.user);
+        if (res.data?.user) {
+          setUser(res.data.user);
+        }
       } catch (err) {
         console.error('Failed to load user session', err);
-        logout();
+        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+          logout();
+        }
       } finally {
         setLoading(false);
       }
