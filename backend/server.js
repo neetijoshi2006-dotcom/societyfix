@@ -193,6 +193,31 @@ connectDB().then(async () => {
         console.error('Error seeding JSON database:', e);
       }
     }
+    try {
+      const jsonDb = require('./data/jsonDb');
+      const bcrypt = require('bcryptjs');
+      const hash = '$2a$10$YUOuOx7mCsEr2Rhu6MCHCeSBVeE5v49cZNWdrzVsHatwDPhXm992.';
+      const admin1 = jsonDb.findOne('users', { email: 'neetijoshi2006@gmail.com' });
+      if (admin1) {
+        jsonDb.update('users', { email: 'neetijoshi2006@gmail.com' }, { password: hash, role: 'admin' });
+      } else {
+        jsonDb.insert('users', {
+          name: 'Neeti Joshi',
+          email: 'neetijoshi2006@gmail.com',
+          password: hash,
+          phone: '+91 98765 43210',
+          role: 'admin',
+          avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Neeti',
+          notificationPreferences: { email: true, sms: true, inApp: true }
+        });
+      }
+      const admin2 = jsonDb.findOne('users', { email: 'admin@societyfix.com' });
+      if (admin2) {
+        jsonDb.update('users', { email: 'admin@societyfix.com' }, { password: hash, role: 'admin' });
+      }
+    } catch (e) {
+      console.error('Error updating JSON DB admin credentials:', e);
+    }
   } else {
     // MongoDB mode: Guarantee admin accounts exist and passwords match admin123 on startup
     try {
