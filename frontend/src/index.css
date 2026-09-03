@@ -24,7 +24,7 @@
 
   .glass-card-hover {
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl 
-           hover:shadow-indigo-100/40 dark:hover:shadow-none dark:hover:border-slate-700/60;
+           hover:shadow-emerald-100/40 dark:hover:shadow-none dark:hover:border-slate-700/60;
   }
 
   .glass-input {
