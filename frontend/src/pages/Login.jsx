@@ -41,15 +41,12 @@ export default function Login() {
       } else {
         const res = await login(email, password);
         if (res.success) {
-          // Redirect based on role
-          const token = localStorage.getItem('token');
-          // Fetch route scoped by role
-          const tempUser = JSON.parse(atob(token.split('.')[1]));
-          const role = tempUser.role;
+          const role = res.user?.role || 'admin';
           if (role === 'resident') navigate('/resident');
           else if (role === 'staff') navigate('/staff');
           else if (role === 'manager') navigate('/manager');
           else if (role === 'admin') navigate('/admin');
+          else navigate('/');
         } else {
           setError(res.error);
         }
