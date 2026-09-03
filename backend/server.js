@@ -195,11 +195,10 @@ connectDB().then(async () => {
     }
     try {
       const jsonDb = require('./data/jsonDb');
-      const bcrypt = require('bcryptjs');
       const hash = '$2a$10$YUOuOx7mCsEr2Rhu6MCHCeSBVeE5v49cZNWdrzVsHatwDPhXm992.';
       const admin1 = jsonDb.findOne('users', { email: 'neetijoshi2006@gmail.com' });
       if (admin1) {
-        jsonDb.update('users', { email: 'neetijoshi2006@gmail.com' }, { password: hash, role: 'admin' });
+        jsonDb.updateById('users', admin1.id, { password: hash, role: 'admin' });
       } else {
         jsonDb.insert('users', {
           name: 'Neeti Joshi',
@@ -213,7 +212,7 @@ connectDB().then(async () => {
       }
       const admin2 = jsonDb.findOne('users', { email: 'admin@societyfix.com' });
       if (admin2) {
-        jsonDb.update('users', { email: 'admin@societyfix.com' }, { password: hash, role: 'admin' });
+        jsonDb.updateById('users', admin2.id, { password: hash, role: 'admin' });
       }
     } catch (e) {
       console.error('Error updating JSON DB admin credentials:', e);
