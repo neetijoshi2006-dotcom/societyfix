@@ -194,122 +194,43 @@ connectDB().then(async () => {
       }
     }
   } else {
-    // MongoDB mode: check if Users is empty and seed default users & announcements
+    // MongoDB mode: Guarantee admin accounts exist and passwords match admin123 on startup
     try {
       const User = require('./models/Users');
-      const count = await User.countDocuments();
-      if (count === 0) {
-        console.log('🌱 MongoDB database is empty. Auto-seeding initial data...');
-        const mongoose = require('mongoose');
-        const bcrypt = require('bcryptjs');
-        const hashPassword = (p) => bcrypt.hashSync(p, 10);
-        
-        // Seed default users
-        const users = [
-          {
-            _id: new mongoose.Types.ObjectId('660d1b2f9f8c3c2f48d3c1a1'),
-            name: 'Vikram Aditya',
-            email: 'neetijoshi2006@gmail.com',
-            password: hashPassword('admin123'),
-            phone: '+91 98765 43210',
-            role: 'admin',
-            avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-            notificationPreferences: { email: true, sms: true, inApp: true }
-          },
-          {
-            _id: new mongoose.Types.ObjectId('660d1b2f9f8c3c2f48d3c1a2'),
-            name: 'Suresh Patil',
-            email: 'manager@societyfix.com',
-            password: hashPassword('manager123'),
-            phone: '+91 98765 43211',
-            role: 'manager',
-            avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150',
-            notificationPreferences: { email: true, sms: true, inApp: true }
-          },
-          {
-            _id: new mongoose.Types.ObjectId('660d1b2f9f8c3c2f48d3c1a3'),
-            name: 'Amit Sharma',
-            email: 'amit@societyfix.com',
-            password: hashPassword('resident123'),
-            phone: '+91 98765 43212',
-            role: 'resident',
-            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-            details: { building: 'Orchid', wing: 'A', floor: 4, flatNumber: '402' },
-            notificationPreferences: { email: true, sms: true, inApp: true }
-          },
-          {
-            _id: new mongoose.Types.ObjectId('660d1b2f9f8c3c2f48d3c1a4'),
-            name: 'Priya Deshmukh',
-            email: 'priya@societyfix.com',
-            password: hashPassword('resident123'),
-            phone: '+91 98765 43213',
-            role: 'resident',
-            avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-            details: { building: 'Orchid', wing: 'B', floor: 12, flatNumber: '1205' },
-            notificationPreferences: { email: true, sms: false, inApp: true }
-          },
-          {
-            _id: new mongoose.Types.ObjectId('660d1b2f9f8c3c2f48d3c1a5'),
-            name: 'Rohan Mehta',
-            email: 'rohan@societyfix.com',
-            password: hashPassword('resident123'),
-            phone: '+91 98765 43214',
-            role: 'resident',
-            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-            details: { building: 'Tulip', wing: 'C', floor: 8, flatNumber: '801' },
-            notificationPreferences: { email: false, sms: false, inApp: true }
-          },
-          {
-            _id: new mongoose.Types.ObjectId('660d1b2f9f8c3c2f48d3c1a6'),
-            name: 'Rahul Kumar',
-            email: 'rahul@societyfix.com',
-            password: hashPassword('staff123'),
-            phone: '+91 98765 43220',
-            role: 'staff',
-            avatar: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=150',
-            details: { skills: ['Electrician', 'Plumber'], rating: 4.8, activeJobsCount: 1, isSuspended: false },
-            notificationPreferences: { email: true, sms: true, inApp: true }
-          }
-        ];
-        
-        await User.insertMany(users);
-        console.log('⚡ MongoDB Users seeded successfully.');
-        
-        // Seed a default complaint
-        const Complaint = require('./models/Complaints');
-        const complaints = [
-          {
-            title: 'Water Leakage in Bathroom Ceiling',
-            description: 'Water is dripping constantly from the ceiling in the master bathroom. It is starting to damage the wall paint.',
-            category: 'Plumbing',
-            priority: 'high',
-            status: 'assigned',
-            location: { building: 'Orchid', wing: 'A', floor: 4, flatNumber: '402', exactLocation: 'Master Bathroom Ceiling' },
-            residentId: '660d1b2f9f8c3c2f48d3c1a3',
-            assignedStaffId: '660d1b2f9f8c3c2f48d3c1a6',
-            images: ['https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400'],
-            timeline: [
-              { status: 'pending', notes: 'Complaint registered by Resident Amit Sharma', updatedBy: '660d1b2f9f8c3c2f48d3c1a3' }
-            ]
-          }
-        ];
-        await Complaint.insertMany(complaints);
-        
-        // Seed default announcements
-        const Announcement = require('./models/Announcements');
-        const announcements = [
-          {
-            title: 'Scheduled Water Shutdown',
-            content: 'Please note there will be a scheduled water shutdown on Thursday (July 3) from 10:00 AM to 2:00 PM for cleaning of overhead water tanks of building Orchid Wing A & B.',
-            category: 'water-shutdown',
-            postedBy: '660d1b2f9f8c3c2f48d3c1a2'
-          }
-        ];
-        await Announcement.insertMany(announcements);
-        console.log('🌱 MongoDB seeding complete!');
+      const bcrypt = require('bcryptjs');
+      const hashPassword = (p) => bcrypt.hashSync(p, 10);
+
+      const adminAccounts = [
+        {
+          name: 'Neeti Joshi',
+          email: 'neetijoshi2006@gmail.com',
+          password: hashPassword('admin123'),
+          phone: '+91 98765 43210',
+          role: 'admin',
+          avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Neeti',
+          notificationPreferences: { email: true, sms: true, inApp: true }
+        },
+        {
+          name: 'Vikram Aditya',
+          email: 'admin@societyfix.com',
+          password: hashPassword('admin123'),
+          phone: '+91 98765 43211',
+          role: 'admin',
+          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+          notificationPreferences: { email: true, sms: true, inApp: true }
+        }
+      ];
+
+      for (const adminData of adminAccounts) {
+        await User.findOneAndUpdate(
+          { email: adminData.email },
+          { $set: adminData },
+          { upsert: true, new: true }
+        );
       }
+      console.log('⚡ Admin accounts verified & ready in MongoDB Atlas.');
     } catch (err) {
-      console.error('Error auto-seeding MongoDB:', err);
+      console.error('Error verifying admin accounts:', err);
     }
   }
   
