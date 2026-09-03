@@ -27,23 +27,9 @@ app.use(helmet({
   crossOriginResourcePolicy: false // Allow loading images from different origins
 }));
 
-// CORS — allow local dev + any configured FRONTEND_URL (Vercel)
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:5000',
-  process.env.FRONTEND_URL,
-].filter(Boolean);
-
+// CORS — allow Vercel domains, local dev, and mobile clients
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, server-to-server)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS blocked: ${origin}`));
-    }
-  },
+  origin: true,
   credentials: true,
 }));
 app.use(express.json());
