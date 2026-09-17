@@ -8,6 +8,7 @@ router.post('/', authenticateToken, messageController.sendMessage);
 router.get('/:complaintId', authenticateToken, messageController.getMessages);
 
 // Direct Messages between users
+router.get('/contacts', authenticateToken, messageController.getChatContacts);
 router.post('/dm', authenticateToken, messageController.sendDirectMessage);
 router.get('/dm/:partnerId', authenticateToken, messageController.getDirectMessages);
 

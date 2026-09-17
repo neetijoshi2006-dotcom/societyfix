@@ -268,3 +268,85 @@ exports.getDirectMessages = async (req, res) => {
   }
 };
 
+// Get list of all residents & staff for starting a new conversation
+exports.getChatContacts = async (req, res) => {
+  try {
+    const currentUserId = req.user.id;
+    let dbUsers = [];
+
+    if (global.useJsonDb) {
+      dbUsers = jsonDb.find('users');
+    } else {
+      const User = require('../models/Users');
+      dbUsers = await User.find().lean();
+      dbUsers = dbUsers.map(u => ({ ...u, id: u._id.toString() }));
+    }
+
+    // Default community directory members to ensure rich neighborhood list
+    const defaultCommunityMembers = [
+      { id: 'u1', name: 'Priya Sharma',    flat: 'A-201', role: 'resident', email: 'priya.sharma@example.com' },
+      { id: 'u2', name: 'Raj Mehta',       flat: 'B-104', role: 'resident', email: 'raj.mehta@example.com' },
+      { id: 'u3', name: 'Ananya Singh',    flat: 'A-305', role: 'resident', email: 'ananya.singh@example.com' },
+      { id: 'u4', name: 'Society Manager', flat: 'Office', role: 'manager', email: 'manager@societyfix.com' },
+      { id: 'u5', name: 'Vikram Patel',    flat: 'C-402', role: 'resident', email: 'vikram.patel@example.com' },
+      { id: 'u6', name: 'Anita Patel',     flat: 'A-102', role: 'resident', email: 'anita.patel@example.com' },
+      { id: 'u7', name: 'Vikram Singh',    flat: 'B-201', role: 'resident', email: 'vikram.singh@example.com' },
+      { id: 'u8', name: 'Priya Desai',     flat: 'C-305', role: 'resident', email: 'priya.desai@example.com' },
+      { id: 'u9', name: 'Karan Mehra',     flat: 'B-402', role: 'resident', email: 'karan.mehra@example.com' },
+      { id: 'u10', name: 'Sneha Reddy',    flat: 'D-105', role: 'resident', email: 'sneha.reddy@example.com' },
+      { id: 'u11', name: 'Rahul Kumar',    flat: 'Maintenance Staff', role: 'staff', email: 'rahul.kumar@example.com' },
+      { id: 'u12', name: 'Amit Sharma',    flat: 'A-402', role: 'resident', email: 'amit@societyfix.com' },
+      { id: 'u13', name: 'Rohan Mehta',    flat: 'C-801', role: 'resident', email: 'rohan@societyfix.com' },
+    ];
+
+    // Map registered users
+    const mappedDbUsers = dbUsers
+      .filter(u => u.id !== currentUserId && u.email !== req.user.email)
+      .map(u => {
+        let flat = 'Resident';
+        if (u.details?.wing && u.details?.flatNumber) {
+          flat = `${u.details.wing}-${u.details.flatNumber}`;
+        } else if (u.role === 'manager') {
+          flat = 'Office';
+        } else if (u.role === 'admin') {
+          flat = 'Super Admin';
+        } else if (u.role === 'staff') {
+          flat = u.details?.skills?.join(', ') || 'Staff';
+        }
+        return {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          role: u.role || 'resident',
+          flat,
+          avatar: u.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(u.name)}`,
+          phone: u.phone || ''
+        };
+      });
+
+    // Combine registered users first, then community presets (avoiding duplicate emails/names)
+    const existingEmails = new Set(mappedDbUsers.map(u => u.email?.toLowerCase()));
+    const finalContacts = [...mappedDbUsers];
+
+    defaultCommunityMembers.forEach(m => {
+      if (!existingEmails.has(m.email.toLowerCase()) && m.email.toLowerCase() !== req.user.email?.toLowerCase()) {
+        finalContacts.push({
+          id: m.id,
+          name: m.name,
+          email: m.email,
+          role: m.role,
+          flat: m.flat,
+          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(m.name)}`,
+          phone: '+91 98765 00000'
+        });
+      }
+    });
+
+    res.status(200).json({ contacts: finalContacts });
+  } catch (error) {
+    console.error('Get chat contacts error:', error);
+    res.status(500).json({ message: 'Server error retrieving chat contacts.' });
+  }
+};
+
+
