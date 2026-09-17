@@ -79,13 +79,10 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Message sent
+  // Message sent (complaint chat - legacy)
   socket.on('send_message', (data) => {
-    const { complaintId, senderId, receiverId, message, id, createdAt, attachments } = data;
-    // Broadcast to the room
+    const { complaintId, senderId, receiverId, message, id, createdAt } = data;
     io.to(`complaint_${complaintId}`).emit('message_received', data);
-    
-    // Also notify receiver if they are not in the room
     io.to(`user_${receiverId}`).emit('notification_received', {
       type: 'new_message',
       title: 'New Chat Message',
@@ -95,8 +92,35 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Join DM room between two users
+  socket.on('join_dm', ({ userId, partnerId }) => {
+    const roomId = [userId, partnerId].sort().join('_dm_');
+    socket.join(roomId);
+    console.log(`💬 ${userId} joined DM room: ${roomId}`);
+  });
+
+  // Send a direct message between two users
+  socket.on('send_direct_message', (data) => {
+    const { senderId, senderName, receiverId, message, createdAt, id } = data;
+    const roomId = [senderId, receiverId].sort().join('_dm_');
+
+    // Send to the room (both users if receiver is in room)
+    socket.to(roomId).emit('direct_message_received', {
+      id, senderId, senderName, receiverId, message, createdAt
+    });
+
+    // Also send notification to receiver's personal room if they're not in the DM room
+    io.to(`user_${receiverId}`).emit('direct_message_received', {
+      id, senderId, senderName, receiverId, message, createdAt
+    });
+  });
+
+  // Typing indicator for DMs
+  socket.on('dm_typing', ({ senderId, receiverId, isTyping }) => {
+    socket.to(`user_${receiverId}`).emit('dm_typing', { senderId, isTyping });
+  });
+
   socket.on('disconnect', () => {
-    // Clean up registered user
     for (let [userId, socketId] of activeUsers.entries()) {
       if (socketId === socket.id) {
         activeUsers.delete(userId);

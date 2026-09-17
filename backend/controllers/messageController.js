@@ -153,3 +153,118 @@ exports.getMessages = async (req, res) => {
     res.status(500).json({ message: 'Server error retrieving messages.' });
   }
 };
+
+// Send direct message between users
+exports.sendDirectMessage = async (req, res) => {
+  try {
+    const { receiverId, message } = req.body;
+    const senderId = req.user.id;
+
+    if (!receiverId || !message) {
+      return res.status(400).json({ message: 'receiverId and message are required.' });
+    }
+
+    const newMsgObj = {
+      senderId,
+      receiverId: receiverId.toString(),
+      message,
+      isDirect: true,
+      seen: false,
+      createdAt: new Date().toISOString()
+    };
+
+    let msg;
+    if (global.useJsonDb) {
+      msg = jsonDb.insert('messages', newMsgObj);
+      const senderUser = jsonDb.findById('users', senderId);
+      msg.senderName = senderUser ? senderUser.name : 'User';
+      msg.senderAvatar = senderUser ? senderUser.avatar : null;
+    } else {
+      const Message = require('../models/Messages');
+      const mongoMsg = new Message({
+        ...newMsgObj,
+        senderId,
+        receiverId
+      });
+      await mongoMsg.save();
+
+      const User = require('../models/Users');
+      const senderUser = await User.findById(senderId).lean();
+
+      msg = mongoMsg.toObject();
+      msg.id = mongoMsg._id.toString();
+      msg.senderName = senderUser ? senderUser.name : 'User';
+      msg.senderAvatar = senderUser ? senderUser.avatar : null;
+    }
+
+    res.status(201).json({ message: msg });
+  } catch (error) {
+    console.error('Send DM error:', error);
+    res.status(500).json({ message: 'Server error sending direct message.' });
+  }
+};
+
+// Get direct messages between current user and partner
+exports.getDirectMessages = async (req, res) => {
+  try {
+    const { partnerId } = req.params;
+    const currentUserId = req.user.id;
+
+    let chatList = [];
+    if (global.useJsonDb) {
+      const allMsgs = jsonDb.find('messages');
+      chatList = allMsgs.filter(m => 
+        (m.senderId === currentUserId && m.receiverId === partnerId) ||
+        (m.senderId === partnerId && m.receiverId === currentUserId)
+      );
+
+      const users = jsonDb.find('users');
+      chatList = chatList.map(m => {
+        const sender = users.find(u => u.id === m.senderId);
+        return {
+          ...m,
+          senderName: sender ? sender.name : 'User',
+          senderAvatar: sender ? sender.avatar : null
+        };
+      });
+
+      // Mark unread as seen
+      chatList.forEach(m => {
+        if (m.receiverId === currentUserId && !m.seen) {
+          jsonDb.updateById('messages', m.id, { seen: true });
+          m.seen = true;
+        }
+      });
+    } else {
+      const Message = require('../models/Messages');
+      const mongoMessages = await Message.find({
+        $or: [
+          { senderId: currentUserId, receiverId: partnerId },
+          { senderId: partnerId, receiverId: currentUserId }
+        ]
+      })
+        .populate('senderId', 'name avatar')
+        .sort({ createdAt: 1 })
+        .lean();
+
+      chatList = mongoMessages.map(m => ({
+        ...m,
+        id: m._id.toString(),
+        senderName: m.senderId ? m.senderId.name : 'User',
+        senderAvatar: m.senderId ? m.senderId.avatar : null,
+        senderId: m.senderId ? m.senderId._id.toString() : null
+      }));
+
+      await Message.updateMany(
+        { senderId: partnerId, receiverId: currentUserId, seen: false },
+        { $set: { seen: true } }
+      );
+    }
+
+    res.status(200).json({ messages: chatList });
+  } catch (error) {
+    console.error('Get DMs error:', error);
+    res.status(500).json({ message: 'Server error retrieving direct messages.' });
+  }
+};
+
